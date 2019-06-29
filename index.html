@@ -1,0 +1,172 @@
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <title>Timeline</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css"
+    />
+    <style class="cp-pen-styles">
+      @import url("https://fonts.googleapis.com/css?family=Roboto+Mono&display=swa");
+      body {
+        height: 100vh;
+        font-family: "Roboto Mono", monospace;
+        background: #001f3f;
+      }
+      .container h1 {
+        color: #86b7e7;
+        padding: 1px 100px;
+        font-family: "Roboto Mono", monospace;
+        font-weight: 100;
+      }
+
+      .container ul {
+        margin: 0;
+        margin-top: 50px;
+        list-style: none;
+        position: relative;
+        padding: 1px 100px;
+        color: #fff;
+        font-size: 13px;
+      }
+      .container ul:before {
+        content: "";
+        width: 1px;
+        height: 100%;
+        position: absolute;
+        border-left: 2px dashed #fff;
+      }
+      .container ul li {
+        position: relative;
+        margin-left: 30px;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 14px;
+        border-radius: 6px;
+        width: 450px;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.12), 0 2px 2px rgba(0, 0, 0, 0.08);
+      }
+      .container ul li:not(:first-child) {
+        margin-top: 60px;
+      }
+      .container ul li > span {
+        width: 2px;
+        height: 100%;
+        background: #fff;
+        left: -30px;
+        top: 0;
+        position: absolute;
+      }
+      .container ul li > span:before,
+      .container ul li > span:after {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        position: absolute;
+        background: #86b7e7;
+        left: -5px;
+        top: 0;
+      }
+      .container ul li span:after {
+        top: 100%;
+      }
+      .container ul li > div {
+        margin-left: 10px;
+      }
+      .container div .title {
+        font-size: 16px;
+      }
+      .container div .type {
+        font-size: 12px;
+      }
+      .container div .title img {
+        width: 16px;
+        height: 16px;
+        margin-bottom: -2px;
+        margin-left: 2px;
+        margin-right: 5px;
+      }
+      .container div .title span {
+        background-color: #2ecc40;
+        border-radius: 10%;
+        padding: 0.14em;
+      }
+      .container div .info {
+        font-weight: 300;
+      }
+      .container div > div {
+        margin-top: 5px;
+      }
+      .container span.number {
+        height: 100%;
+      }
+      .container span.number span {
+        position: absolute;
+        font-size: 12px;
+        left: -44px;
+        font-weight: bold;
+      }
+      .container span.number span:first-child {
+        top: -1px;
+      }
+      .container span.number span:last-child {
+        top: calc(100% - 1px);
+      }
+    </style>
+  </head>
+  <body>
+    <meta charset="UTF-8" />
+    <title>Vertical timeline intervals</title>
+
+    <div class="container">
+      <h1>😤😤非常不准</h1>
+      <ul>
+        <li>
+          <span></span>
+          <div>
+            <div class="type">2019-06-28</div>
+            <div class="title">
+              国航<img src="./static/aircorp/aircorp_ca.png" />CA5401 (执飞
+              澳门航空<img src="./static/aircorp/aircorp_nx.png" />NX7)
+              <span>计划</span>
+            </div>
+            <div class="subtitle">
+              北京首都(PEK) ✈️===============&gt; 澳门(MFM)
+            </div>
+            <div class="info">
+              <pre>
+STA: 08:25   STD: 12:20
+ETA: 08:25   ETD: 12:20
+ATA: --      ATD: --
+-------------------------------
+空客321-231B 注册编号: BMBA
+</pre
+              >
+            </div>
+          </div>
+          <span class="number"><span>12:20</span> <span>08:25</span></span>
+        </li>
+        <li>
+          <div>
+            <span></span>
+            <div class="title">Codify</div>
+            <div class="info">Let's make coolest things in javascript</div>
+            <div class="type">Presentation</div>
+          </div>
+          <span class="number"><span>13:00</span> <span>14:00</span></span>
+        </li>
+        <li>
+          <div>
+            <span></span>
+            <div class="title">Codify</div>
+            <div class="info">Let's make coolest things in css</div>
+            <div class="type">Review</div>
+          </div>
+          <span class="number"><span>15:00</span> <span>17:45</span></span>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>
