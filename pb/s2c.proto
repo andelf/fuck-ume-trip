@@ -1,0 +1,364 @@
+syntax = "proto2";
+
+// 经停
+message FlightStopInfo {
+    // '备降'
+    optional string airportStatus = 1;
+    optional bool isExpand = 2;
+    // SZX
+    optional string airportCode = 3;
+    // '深圳宝安'
+    optional string airportName = 4;
+    optional string terminal = 5;
+    optional string weather = 6;
+    optional string temp = 7;
+    optional string std = 8;
+    optional string sta = 9;
+    optional string etd = 10;
+    optional string eta = 11;
+    // 实际到达
+    optional string atd = 12;
+    //  实际出发（离开)
+    optional string ata = 13;
+    optional string deptFlightDate = 14;
+    optional string destFlightDate = 15;
+    optional string actualDeptDate = 16;
+    optional string actualDestDate = 17;
+    optional string estimateDeptDate = 18;
+    optional string estimateDestDate = 19;
+    optional string deptTimeZone = 20;
+    optional string destTimeZone = 21;
+    optional string gate = 22;
+}
+
+message ShareInfo {
+    optional string sharedUrl = 1;
+    optional string deptFlightDate = 2;
+    optional string flightNo = 3;
+    optional string flightStatus = 4; // 计划
+    optional string sta = 5; // arravial 计划
+    optional string std = 6; // depart 计划
+    optional string logoRId = 7; // gh_266737106011
+}
+
+message S2cContactInfo {
+
+}
+
+message S2cFlyRoutePosExtendBean {
+    required string lon = 1;
+    required string lat = 2;
+    optional string cityName = 3;
+    // 航速?
+    optional string cas = 4;
+    // 海拔高度 m
+    optional string alt = 5;
+    // "2019-06-26 10:20:00"
+    optional string time = 6;
+    optional double ratio = 7;
+}
+
+message S2cFlyRoutePosBean {
+    required string lon = 1;
+    required string lat = 2;
+    // 出发城市, 到达城市
+    optional string cityName = 3;
+    optional string cas = 4;
+    optional string alt = 5;
+    optional string time = 6;
+    optional double ratio = 7;
+    // URC, CTU
+    optional string airportCode = 8;
+    // '乌鲁木齐地窝堡', '成都双流'
+    optional string airlineName = 9;
+}
+
+message S2cFlightRouteBean {
+    repeated S2cFlyRoutePosExtendBean posList = 1; // 未飞前为空
+    // 上次记录的信息，大概是前天？
+    repeated S2cFlyRoutePosExtendBean nextPosList = 2; // 到达后为空
+    // len = 2, 备降+1
+    repeated S2cFlyRoutePosBean flightStopList = 3;
+}
+
+
+message S2cFlightStatusMoreCardInfo {
+    optional string value = 1;
+    optional string icon = 2;
+    optional string jumpPage = 3;
+    optional string h5Url = 4;
+    reserved 5; // Map<string, Object> jumpParam
+    optional string jumpParamstring = 6; // same as 5 in json
+}
+
+
+message S2cLatLng {
+    optional double longitude = 1;
+    optional double latitude = 2;
+}
+
+message SubStatusTip {
+    required string title = 1;
+    required string content = 2;
+    optional string unit = 3;
+}
+
+message FlightTimeWindow {
+    message TimeWindowBean {
+        optional string cityName = 3;
+        optional string date = 4;
+        optional string time = 5;
+    }
+    optional string windowName = 1;
+    repeated TimeWindowBean internationalTimeZones = 2;
+}
+
+message GisBean {
+    // FIXME
+    message GisInfoDescribeListBean {
+        /**
+                    private String gisInfoBriefDesc;
+            private String gisInfoBriefDescColor;
+            private String gisInfoTimeDesc;
+            private String isunfold;
+        */
+        optional string a1 = 1;
+        optional string a2 = 2;
+        optional string a3 = 3;
+        optional string a4 = 4;
+    }
+    optional string gis = 1;
+    optional string rank = 2;
+    optional string gislat = 3;
+    optional string gislon = 4;
+    repeated GisInfoDescribeListBean gisInfoDescribeList = 5;
+    optional int32 abnormalSigns = 6;
+    optional string uiStatus = 7;
+    optional float anchorOpen_X = 10; // ?
+}
+
+message JumpParamsPb {
+    optional string paramsMap = 1; // json obj
+    optional string pageId = 2;
+    reserved 3; // paramsMap values
+}
+
+message S2cFlightStatusBean {
+    // 状态 '计划' '到达'
+    optional string flightStatus = 1;
+    optional string flightSubStatus = 2;
+    optional string msgTitle = 3;
+    optional string msgContent = 4;
+    optional string msgUrl = 5;
+    repeated string hintTitle = 6;
+    // 其他信息？ 历史准点率
+    // ['延误3小时29分钟到达，总里程1268公里']
+    repeated string hintContent = 7;
+    // ? 0.0
+    optional double flyRatio = 8;
+    // 出发城市 乌鲁木齐
+    optional string deptCity = 9;
+    // 到达城市 成都
+    optional string destCity = 10;
+    // 出发机场代码
+    optional string deptCityCode = 11;
+    // 到达机场代码
+    optional string destCityCode = 12;
+    // 出发机场
+    optional string deptAirportName = 13;
+    // 到达机场： 成都双流
+    optional string destAirportName = 14;
+    // 航班号 'CA****'
+    optional string flightNo = 15;
+    // 航司名 '中国国航'
+    optional string airlineName = 16;
+    // 航司代码 CA
+    optional string airlineCode = 17;
+    // 计划出发
+    optional string std = 18;
+    optional string stdPek = 19;
+    // Schedule Time of arrival, 计划到达
+    optional string sta = 20;
+    // 日期？ "2019-06-26"
+    optional string deptFlightDate = 21;
+    // 日期？ "2019-06-26"
+    optional string destFlightDate = 22;
+    optional string deptTimeZone = 23;
+    optional string destTimeZone = 24;
+    // 预计出发
+    optional string etd = 25;
+    // 预计到达 "10:20"
+    optional string eta = 26;
+    // 实际出发
+    optional string atd = 27;
+    // 实际到达
+    optional string ata = 28;
+    optional string atdPek = 29;
+    // "" ?
+    optional string ataPek = 30;
+    optional string actualDeptDate = 31;
+    optional string actualDestDate = 32;
+    // 预计日期
+    optional string estimateDeptDate = 33;
+    // 预计日期
+    optional string estimateDestDate = 34;
+    // 登机口
+    optional string deptGate = 35;
+    optional string deptGateSourceId = 36;
+    optional string deptGateBuildingId = 37;
+    // 出发层？ 0
+    optional int32 deptGateFloor = 38;
+    // 0
+    optional int32 isShowDeptGateMap = 39;
+    // 0
+    optional int32 isShowDeptCkiCounterMap = 40;
+    // 0
+    optional int32 isShowDestCarouselMap = 41;
+    // false
+    optional bool landPos = 42;
+    // 到达出口，未定显示 '--'
+    optional string destExit = 43;
+    // 航站楼
+    optional string deptTerminal = 44;
+    // 航站楼
+    optional string destTerminal = 45;
+    // 行李转盘，未定显示 '--'
+    optional string carousel = 46;
+    // 值机柜台
+    optional string ckiCounter = 47;
+    // 前序航班 'CA4151'
+    optional string preFlightNo = 48;
+    // 前序航班状态 '计划' '到达'
+    optional string preFlightStatus = 49;
+    // 0 'NKG'
+    optional string preDeptCity = 50;
+    // 0 'KWE'
+    optional string preDestCity = 51;
+    // 无信息或者 19
+    optional int32 preDeptDelayTime = 52;
+    // 无信息或者 1
+    optional int32 preDestDelayTime = 53;
+    // "", '已于6月24日到达'
+    optional string preFlightStatusDesc = 54;
+    // 延误时间 0
+    optional int32 deptDelayTime = 55;
+    // 延误时间 0
+    optional int32 destDelayTime = 56;
+    optional string destAlternateTime = 57;
+    optional string deptAlternateTime = 58;
+    optional string alternateDate = 59;
+    optional string alternateStatus = 60;
+    optional string alternateTimeZone = 61;
+    // ? 'SZX' 备降机场
+    optional string alternateAirport = 62;
+    // 气温
+    optional string deptTemp = 63;
+    // 气温 '24℃'
+    optional string destTemp = 64;
+    // 天气 '弱阵型降水/雨'
+    optional string deptWeather = 65;
+    // 天气 '小雨/轻雾'
+    optional string destWeather = 66;
+    // 航司 '中国国航'
+    optional string hostAirline = 67;
+    // 承运航班 'CZ3659承运'， 其他为空
+    optional string hostFlightDesc = 68;
+    // 飞机注册编号 "B6038"
+    optional string planeRegNo = 69;
+    // 机型 '空客 319-100'
+    optional string planeType = 70;
+    // 机龄 "14.7"
+    optional string planeAge = 71;
+    // 飞行公里数 2258
+    optional int32 flyDistance = 72;
+    // 0
+    optional int32 currentFlyDistance = 73;
+    // 飞行公里数 '2258公里'
+    optional string distanceDesc = 74;
+    optional string flyDistanceDesc = 75;
+    // 飞行时间 200 in min
+    optional int32 flyTime = 76;
+    // 当前飞行时间?
+    optional int32 currentFlyTime = 77;
+    // 飞行时间 '3小时20分'
+    optional string flyTimeDesc = 78;
+    // '正餐'
+    optional string meal = 79;
+    // '当前状态为计划'
+    optional string flyMapTitle = 80;
+    // 历史准点率 "82.2%"
+    optional string punctualityRate = 81;
+    // 可猜延误？
+    optional int32 canPredict = 82;
+    optional string unPredictDesc = 83;
+    // 0
+    optional int64 subId = 84;
+    // 执飞航班号 NX7. 不稳定。jumpParams 比较靠谱
+    optional string hostNos = 85;
+    optional bool isHaveFlightStop = 86;
+    // 备降信息 ? (是否经停也在)
+    //
+    repeated FlightStopInfo flightStopInfoList = 87;
+    optional string etdOrAtdTitle = 88;
+    optional string etaOrAtaTitle = 89;
+    optional string etdOrAtd = 90;
+    optional string etaOrAta = 91;
+    // 是否已经在飞
+    optional int32 alreadyFlying = 92;
+    // 是否提供WiFi  '不提供'
+    optional string wifi = 93;
+    optional string flightInfoTime = 94;
+    optional string flightInfoTitle = 95;
+    // ""
+    optional string destLandPosDesc = 96;
+    // 分享航班的信息，url
+    optional ShareInfo shareInfo = 97;
+    repeated S2cContactInfo contactInfoList = 98;  // no
+    optional string nextDayDesc = 99;
+    // 出发机场状态： '最新出港时间 19:27'
+    optional string deptAirportDesc = 100;
+    // 到达机场状态： '最新进港时间 19:29'
+    optional string destAirportDesc = 101;
+    optional string etdDesc = 102; // !
+    // 是否展示前序航班 true
+    optional bool preFlightShowFlag = 103;
+    // 飞行路径信息（已飞行，未飞行，出发到达）
+    optional S2cFlightRouteBean flightRoute = 104;
+    // 飞机仓位图
+    optional string planImg = 105;
+    // 下方圆形工具：准点分析，航班点评，全民预测...
+    repeated S2cFlightStatusMoreCardInfo moreCardInfos = 106;
+    optional string meteorogramPicUrl = 107;
+    // 地图的范围，[left_bottom, right_top]
+    repeated S2cLatLng imageBounds = 108;
+    // 历史准点率
+    optional string statusDescription = 109;
+    // 上面状态条。值机完成度，排队位
+    repeated SubStatusTip statusBox = 110;
+    // #41B24E
+    optional string statusDescriptionColor = 111;
+    optional string deptTeminalGateDesc = 112;
+    // 登机口步行信息： '安检后步行5-10分钟'
+    optional string gateWalkingTimeDesc = 113;
+    optional string destLandPosDescription = 114;
+    // 到达廊桥信息： '靠廊桥'
+    optional string deptLandPosDescription = 115;
+    optional FlightTimeWindow deptWindows = 116;
+    optional FlightTimeWindow destWindows = 117;
+    optional string maskDesc = 118;
+    // 导航点列表
+    repeated GisBean futureGis = 119;
+    repeated GisBean realGis = 120;
+    // ?? "2019-06-25 13:35"
+    optional string onnSlideEndEst = 121;
+    // {"flightNo":"CA4192","flightDate":"2019-06-26","destCode":"CTU","hostFlightNo":"CA4192","deptCode":"URC","planeType":"319-100"}
+    // pageId: "104150"
+    optional JumpParamsPb jumpParams = 122; // v
+    // 预计值机停办 "09:31",
+    optional string ckiCloseTimeEstPek = 123;
+    // 计划登机时间 "09:35"， 已经到达没有这个字段
+    optional string boardingOpenTimeEst = 124;
+    // '预计起飞时间指飞机离开地面的时间'
+    optional string etdDescription = 125; // v
+    optional bool isShowDate = 150;
+}

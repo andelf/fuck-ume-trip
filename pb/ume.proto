@@ -1,0 +1,75 @@
+syntax = "proto2";
+
+package ume;
+
+import "s2c.proto";
+
+message S2cRspBodyWrapPB {
+    optional bytes responseBody = 1;
+    required int64 errcode = 2;
+    optional string errmsg = 3;
+}
+
+message Error {
+    required int64 code = 1;
+    optional string message = 2;
+}
+
+message CommonResponse {
+    optional string ver = 1;
+    required int32 ret = 2;
+    optional string name = 3;
+    required string key = 4;
+    required string pid = 5;
+    optional Error error = 6;
+    required S2cRspBodyWrapPB payload = 7;
+}
+
+// message S2cFlightStatusBean
+
+message S2cGetFlightStatusOrFlightList {
+    repeated string flightNoList = 1;
+    // repeated
+    required bool isSuccess = 2;
+    // 0 => flightNoList
+    // 1 => FlightStatusList , 1 个或 list
+    required int32 type = 3;
+    repeated S2cFlightStatusBean flightStatusList = 4;
+}
+
+// 标准请求
+message C2sBodyWrap {
+    required string rpver = 1;
+    required string rcver = 2;
+    required string rsid = 3;
+    optional string rpcode = 4; // ?
+    required string rchannel = 5;
+    required string rpid = 6;
+    required string rkey = 7;
+    reserved 8; //  "rparams"
+    required string rcuuid = 9;
+    optional string rappid = 10; // ?
+    optional string raccesskey = 11; // unused?
+    optional string lang = 12; // unused
+    optional string longitude = 13;
+    optional string latitude = 14;
+    required string netType = 15; // 网络 G
+    required string transactionID = 16;
+    required string lastTransactionID = 17;
+    optional string lastReqTime = 18;
+    optional string pageId = 19;
+    optional string lastPageId = 20; // unused
+    optional int64 timeStamp = 21;  // unused
+    optional int32 index = 22; // unused
+    optional string unionId = 23; // unused
+    optional string openId = 24; // unused
+    optional bytes requestBody = 25;
+}
+
+// 检索航班
+message C2sGetFlightStatusByCode {
+    optional string flightNo = 1;
+    required string deptFlightDate = 2;
+    optional string deptAirportCode = 3;
+    optional string destAirportCode = 4;
+}
