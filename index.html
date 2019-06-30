@@ -16,17 +16,20 @@
       }
       .container h1 {
         color: #86b7e7;
-        padding: 1px 100px;
+        padding: 1px 50px;
         font-family: "Roboto Mono", monospace;
         font-weight: 100;
+      }
+      .container input {
+        margin: 1px 50px;
       }
 
       .container ul {
         margin: 0;
-        margin-top: 50px;
+        margin-top: 20px;
         list-style: none;
         position: relative;
-        padding: 1px 100px;
+        padding: 1px 60px;
         color: #fff;
         font-size: 13px;
       }
@@ -43,7 +46,7 @@
         background-color: rgba(255, 255, 255, 0.2);
         padding: 14px;
         border-radius: 6px;
-        width: 450px;
+        /* width: 450px; */
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.12), 0 2px 2px rgba(0, 0, 0, 0.08);
       }
       .container ul li:not(:first-child) {
@@ -115,13 +118,17 @@
         top: calc(100% - 1px);
       }
     </style>
+    <script>
+      function getValue(val) {
+        return false;
+      }
+    </script>
   </head>
   <body>
-    <meta charset="UTF-8" />
-    <title>Vertical timeline intervals</title>
 
     <div class="container">
       <h1>😤😤非常不准</h1>
+      <input type="text" placeholder="Search.." onkeyup="getValue(this.value)">
       <ul>
         <li>
           <span></span>
