@@ -1,4 +1,6 @@
 # clang -shared -undefined dynamic_lookup -o libumetrip.so UMETrip.c
+# clang -shared -fPIC -o libumetrip.so UMETrip.c
+
 
 import ctypes
 import os.path

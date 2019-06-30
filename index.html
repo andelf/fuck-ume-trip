@@ -120,7 +120,13 @@
     </style>
     <script>
       function getValue(val) {
-        return false;
+        fetch('/api/v1/get_flight_by_code', {
+          body: JSON.stringify({code: val}),
+          method: 'POST'
+        })
+        .then(resp => {
+          console.log(resp.json());
+        })
       }
     </script>
   </head>

@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 
-
-
 import aiohttp
 from aiohttp import web
 import os.path
 import logging
+import api
+import pb
 
 
 async def handler(request):
     print(request)
-    # path = request.match_info.get('path', '')
-    path = request.rel_url
-    base = 'https://gateway.shouqiev.com:8443'
-    url = base + str(path)
-    #proxy = 'http://127.0.0.1:1087'
-    proxy =  None
-    headers = dict(request.headers)
+    path = request.match_info.get('path', '')
+    # path = request.rel_url
+    
+    entry = api.Api()
 
-    headers['Host'] = 'gateway.shouqiev.com:8443'
-    headers['Accept-Encoding'] = 'identity' # FIX chunked
-    print(headers)
+    if request.method == 'POST':
+        print(path)
+        if path == 'get_flight_by_code':
+            res = await request.json()
+            print(res)
+            code = res.get('code', '')
+            if code and len(code) > 2:
+                reply = entry.get_flight_status_by_code(code)
+                res = repl.payload.responseBody
+                res = pb.S2cGetFlightStatusOrFlightList.FromString(res)
+                print(res)
+
+                
+
     async with aiohttp.ClientSession() as sess:
         if request.method == 'GET':
             async with sess.get(url, proxy=proxy, headers=headers) as resp:
@@ -59,7 +67,7 @@ def main():
 
     app = web.Application()
     app.add_routes([
-        web.route('*', '/api/{path:.*}', handler),
+        web.route('*', '/api/v1/{path:.*}', handler),
     #    web.route('*', '/static/{path:.*}', static_file_handler),
     ])
     app.router.add_static('/static/', path='./static/', name='static')
