@@ -24,6 +24,23 @@
         margin: 1px 50px;
       }
 
+      .container div#flights {
+      }
+
+      .container div#flights a,
+      .container ul#cards div.info a {
+        margin: 5px 10px;
+        display: inline-block;
+        text-decoration: underline;
+        cursor: pointer;
+        color: #0074D9;
+      }
+
+      .container div#flights .error {
+        margin: 5px 10px;
+        background-color: #FF4136;
+      }
+
       .container ul {
         margin: 0;
         margin-top: 20px;
@@ -119,13 +136,122 @@
       }
     </style>
     <script>
-      function getValue(val) {
+      let g = {};
+      g.lastReq = (new Date()).getTime();
+
+
+      function queryFilght(no, clean, date) {
+        const payload = {code: no};
+        if (date) {
+          payload['date'] = date;
+        }
         fetch('/api/v1/get_flight_by_code', {
+          body: JSON.stringify(payload),
+          method: 'POST'
+        })
+        .then(resp => resp.json())
+        .then(payload => {
+          let {data, error} = payload;
+          console.log(payload);
+          if (error) {
+            return false;
+          }
+          const flight = data;
+
+          let card = document.createElement('li');
+          const aircorpCode = flight.no.substring(0, 2).toLowerCase();
+
+          let hostFlightDesc = "";
+          if (flight.hostFlight.no) {
+            const hostAircorpCode = flight.hostFlight.no.substring(0, 2).toLowerCase();
+            hostFlightDesc = `(执飞 ${flight.hostFlight.aircorp}<img src="./static/aircorp/aircorp_${hostAircorpCode}.png" />${flight.hostFlight.no})`
+          }
+          let preFlightDesc = "";
+          if (flight.preFlight.no) {
+            let when = '';
+            if (/已于(\d+)月(\d+)日到达/.test(flight.preFlight.desc)) {
+              const matches = /已于(\d+)月(\d+)日到达/.exec(flight.preFlight.desc);
+              when = `2017-${matches[1].padStart(2, '0')}-${matches[2].padStart(2, '0')}`;
+            }
+            preFlightDesc = `
+            前序:
+            <a onclick="queryFilght('${flight.preFlight.no}', false, '${when}');">${flight.preFlight.no}</a>
+              ${flight.preFlight.desc} ${flight.preFlight.status}
+            `;
+          }
+
+          card.innerHTML = `
+          <div>
+              <div class="type">${flight.dept.date}</div>
+              <div class="title">
+                ${flight.aircorp}
+                <img src="./static/aircorp/aircorp_${aircorpCode}.png" />
+                ${flight.no} ${hostFlightDesc}
+                <span>${flight.status}</span>
+              </div>
+              <div class="subtitle">
+                ${flight.dept.airport}(${flight.dept.iata}) ✈️===============&gt; ${flight.dest.airport}(${flight.dest.iata})
+              </div>
+              <div class="info">
+                <pre>
+STD: ${flight.std}   STA: ${flight.sta}
+ETD: ${flight.etd}   ETA: ${flight.eta}
+ATD: ${flight.atd === '' ? '--:--' : flight.atd}   ATA: ${flight.ata === '' ? '--:--' : flight.ata}
+-------------------------------
+${flight.plane.type} 注册编号: ${flight.plane.no}
+</pre>
+                ${preFlightDesc}
+              </div>
+            </div>
+            <span class="number"><span>${flight.sta}</span> <span>${flight.std}</span></span>
+          `;
+
+          const cards = document.getElementById('cards');
+          if (clean) {
+            cards.innerHTML = '';
+          }
+          cards.appendChild(card);
+        })
+        return false;
+      }
+
+      function getValue(e) {
+        const val = e.value;
+        if (val.length < 3)  {
+          console.log("TOO short, wait for more input!");
+          return false;
+        }
+        /*
+        if ((new Date()).getTime() - g.lastReq < 5000) {
+          return false;
+        }
+        g.lastReq = (new Date()).getTime();
+        */
+        fetch('/api/v1/search_flights', {
           body: JSON.stringify({code: val}),
           method: 'POST'
         })
         .then(resp => {
-          console.log(resp.json());
+          return resp.json();
+        })
+        .then(payload => {
+          let {data, error} = payload;
+          let dom = document.getElementById('flights');
+          dom.innerHTML = '';
+
+          if (error) {
+            var node = document.createElement('p');
+            node.setAttribute('class', 'error');
+            node.appendChild(document.createTextNode(error.detail));
+            dom.appendChild(node);
+          } else {
+            for (let no of data) {
+              var node = document.createElement('a');
+              node.setAttribute('onclick', `queryFilght('${no}', true);`);
+              node.appendChild(document.createTextNode(no));
+              dom.appendChild(node);
+            }
+          }
         })
       }
     </script>
@@ -134,10 +260,11 @@
 
     <div class="container">
       <h1>😤😤非常不准</h1>
-      <input type="text" placeholder="Search.." onkeyup="getValue(this.value)">
-      <ul>
+      <input type="text" placeholder="Search.." onkeyup="getValue(this)">
+      <hr />
+      <div id="flights"></div>
+      <ul id="cards">
         <li>
-          <span></span>
           <div>
             <div class="type">2019-06-28</div>
             <div class="title">
@@ -164,8 +291,8 @@ ATA: --      ATD: --
         <li>
           <div>
             <span></span>
-            <div class="title">Codify</div>
-            <div class="info">Let's make coolest things in javascript</div>
+            <div class="title">......</div>
+            <div class="info">。。。。。。。。。。。。。。。。。。。。。</div>
             <div class="type">Presentation</div>
           </div>
           <span class="number"><span>13:00</span> <span>14:00</span></span>
@@ -173,8 +300,8 @@ ATA: --      ATD: --
         <li>
           <div>
             <span></span>
-            <div class="title">Codify</div>
-            <div class="info">Let's make coolest things in css</div>
+            <div class="title">。。。。。</div>
+            <div class="info">。。。。。。。。。。。。。。。。。。</div>
             <div class="type">Review</div>
           </div>
           <span class="number"><span>15:00</span> <span>17:45</span></span>

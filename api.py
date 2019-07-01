@@ -85,7 +85,7 @@ class PbRequest(RequestBuilder):
         now = self._now
         req.rpver = (self._version or "1.0")
         req.rcver = "AND_a01_05.02.0528"
-        req.rchannel = "10000005"  # be 10000000
+        req.rchannel = "10000000"  # be 10000000
         # req.rsid = ""
         # ???
         req.rcuuid = self._uuid
@@ -167,11 +167,18 @@ class JsonRequest(RequestBuilder):
 
 class Api(object):
     def __init__(self, *args, **kwargs):
-        self._cuuid = "mc789fd2289a54f6b9757e9a6f66c256a"
+        # self._cuuid = "mc789fd2289a54f6b9757e9a6f66c256a"
+        # self._cuuid = "mc789fd2189a54f6b9757e9a6f66c256a"
+        self._cuuid = random_uuid()
         self.last_tid = ""
         self.last_req_time = f'{int(datetime.now().timestamp() * 1000)}'
 
         self.sess = requests.session()
+
+    def randomize(self):
+        self._cuuid = random_uuid().replace('-', '')
+        self.last_tid = ""
+        self.last_req_time = f'{int(datetime.now().timestamp() * 1000)}'
 
     def request(self, req):
         use_pb = isinstance(req, PbRequest)
@@ -198,7 +205,7 @@ class Api(object):
         else:
             headers['Content-Serialize'] = ''
             self.last_tid = req['transactionID']
-            payload = josn.dumps(req)
+            payload = json.dumps(req)
 
         start_ts = datetime.now().timestamp()
         resp = self.sess.post(URL, payload, headers=headers)
@@ -403,14 +410,14 @@ class Api(object):
             .pid("100042") \
             .name("aircorptypelist") \
             .data({'rcode': code})
-        returnn =  self.request(req)
+        return self.request(req)
 
-    def get_aircorpy_detail(self, code='CA'):
+    def get_aircorp_detail(self, code='CA'):
         req = JsonRequest() \
             .pid("100039") \
             .name("getaircorpdetail") \
             .data({'rcode': code})
-        returnn =  self.request(req)
+        return self.request(req)
 
     def get_flight_pos(self, flight_no):
         # 当前位置
