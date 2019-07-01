@@ -20,6 +20,13 @@
         font-family: "Roboto Mono", monospace;
         font-weight: 100;
       }
+      .container h2 {
+        color: #fff;
+        padding: 1px 50px;
+        font-family: "Roboto Mono", monospace;
+        font-weight: 80;
+        font-size: 0.8em;
+      }
       .container input {
         margin: 1px 50px;
       }
@@ -35,8 +42,10 @@
         cursor: pointer;
         color: #0074D9;
       }
-
-      .container div#flights .error {
+      .container div#errors {
+        padding-top: 50px;
+      }
+      .container div#errors .error {
         margin: 5px 10px;
         background-color: #FF4136;
       }
@@ -140,6 +149,23 @@
       g.lastReq = (new Date()).getTime();
 
 
+      const handleError = (error) => {
+        if (error) {
+          let dom = document.getElementById('errors');
+          dom.innerHTML = '';
+          var node = document.createElement('p');
+          node.setAttribute('class', 'error');
+          node.appendChild(document.createTextNode(`${(new Date()).toISOString()}: ${error.detail}`));
+          dom.appendChild(node);
+        }
+      }
+
+      const cleanError = () => {
+        let dom = document.getElementById('errors');
+        dom.innerHTML = '';
+      }
+
+
       function queryFilght(no, clean, date) {
         const payload = {code: no};
         if (date) {
@@ -154,7 +180,10 @@
           let {data, error} = payload;
           console.log(payload);
           if (error) {
+            handleError(error);
             return false;
+          } else {
+            cleanError();
           }
           const flight = data;
 
@@ -240,11 +269,9 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
           dom.innerHTML = '';
 
           if (error) {
-            var node = document.createElement('p');
-            node.setAttribute('class', 'error');
-            node.appendChild(document.createTextNode(error.detail));
-            dom.appendChild(node);
+            handleError(error);
           } else {
+            cleanError();
             for (let no of data) {
               var node = document.createElement('a');
               node.setAttribute('onclick', `queryFilght('${no}', true);`);
@@ -260,6 +287,7 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
 
     <div class="container">
       <h1>😤😤非常不准</h1>
+      <h2>前序日期有小bug 😐</h2>
       <input type="text" placeholder="Search.." onkeyup="getValue(this)">
       <hr />
       <div id="flights"></div>
@@ -288,25 +316,8 @@ ATA: --      ATD: --
           </div>
           <span class="number"><span>12:20</span> <span>08:25</span></span>
         </li>
-        <li>
-          <div>
-            <span></span>
-            <div class="title">......</div>
-            <div class="info">。。。。。。。。。。。。。。。。。。。。。</div>
-            <div class="type">Presentation</div>
-          </div>
-          <span class="number"><span>13:00</span> <span>14:00</span></span>
-        </li>
-        <li>
-          <div>
-            <span></span>
-            <div class="title">。。。。。</div>
-            <div class="info">。。。。。。。。。。。。。。。。。。</div>
-            <div class="type">Review</div>
-          </div>
-          <span class="number"><span>15:00</span> <span>17:45</span></span>
-        </li>
       </ul>
+      <div id="errors"></div>
     </div>
   </body>
 </html>

@@ -108,6 +108,9 @@ class ApiWrapper(object):
 
         s2c = pb.S2cGetFlightStatusOrFlightList.FromString(reply.payload.responseBody)
         print(s2c)
+        if not s2c.isSuccess:
+            return error_json(detail=f'服务器直接返回错误，应该是远端没有这个数据了')
+
         if s2c.type == 0:
             flight_list = list(s2c.flightNoList)
             return error_json(detail=f"航班代码不唯一 {flight_list}")

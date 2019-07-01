@@ -12,6 +12,7 @@ from aiohttp import web
 import pb
 import umetrip
 import json
+import random
 
 
 __headers__ = {
@@ -165,18 +166,22 @@ class JsonRequest(RequestBuilder):
         return req
 
 
+def random_cuuid():
+    return 'm' + ''.join(random.choice('0123456789abcdef') for _ in range(32))
+
+
 class Api(object):
     def __init__(self, *args, **kwargs):
         # self._cuuid = "mc789fd2289a54f6b9757e9a6f66c256a"
         # self._cuuid = "mc789fd2189a54f6b9757e9a6f66c256a"
-        self._cuuid = random_uuid()
+        self._cuuid = random_cuuid()
         self.last_tid = ""
         self.last_req_time = f'{int(datetime.now().timestamp() * 1000)}'
 
         self.sess = requests.session()
 
     def randomize(self):
-        self._cuuid = random_uuid().replace('-', '')
+        self._cuuid = random_cuuid()
         self.last_tid = ""
         self.last_req_time = f'{int(datetime.now().timestamp() * 1000)}'
 
