@@ -16,12 +16,22 @@ D = json.dumps
 
 def fuck_addr(addr):
     addr = addr.replace('中国澳门', '澳门')
-    addr = addr.replace('中国台北', '台湾台北')
     addr = addr.replace('中国香港', '香港')
+    addr = addr.replace('中国台北', '台湾台北')
+    addr = addr.replace('中国台中', '台湾台中')
+    addr = addr.replace('中国台南', '台湾台南')
+    addr = addr.replace('中国台东', '台湾台东')
+    addr = addr.replace('中国高雄', '台湾高雄')
+    addr = addr.replace('中国马祖', '台湾马祖')
+    addr = addr.replace('中国金门', '台湾金门')
+    addr = addr.replace('中国花莲', '台湾花莲')
+    addr = addr.replace('中国澎湖', '台湾澎湖')
+    addr = addr.replace('中国梨山', '台湾梨山')
+    addr = addr.replace('中国南竿', '台湾南竿')
     return addr
 
 def flight_status_to_json(flight):
-    return {
+    data = {
         'no': flight.flightNo,
         'aircorp': flight.airlineName,
         'status': flight.flightStatus,
@@ -41,6 +51,7 @@ def flight_status_to_json(flight):
             'gate': flight.deptGate,
             'weather': flight.deptWeather,
             'temp': flight.deptTemp,
+            'delay': flight.deptDelayTime,
         },
         'dest': {
             'city': fuck_addr(flight.destCity),
@@ -51,7 +62,8 @@ def flight_status_to_json(flight):
             'timezone': flight.destTimeZone,
             'exit': flight.destExit,
             'weather': flight.destWeather,
-            'temp': flight.destTemp
+            'temp': flight.destTemp,
+            'delay': flight.destDelayTime,
         },
         'plane': {
             'type': flight.planeType,
@@ -67,8 +79,35 @@ def flight_status_to_json(flight):
             'no': flight.preFlightNo,
             'status': flight.preFlightStatus,
             'desc': flight.preFlightStatusDesc,
+            'dept': {
+                'iata': flight.preDeptCity,
+                'delay': flight.preDeptDelayTime,
+            },
+            'dest': {
+                'iata': flight.preDestCity,
+                'delay': flight.preDestDelayTime,
+            }
         }
     }
+    #stops = flight.flightRoute.flightStopList
+    stops = flight.flightStopInfoList
+    data['stops'] = []
+    for stop in stops:
+        print('stop\n', stop)
+        data['stops'].append({
+            'status': stop.airportStatus,
+            'iata': stop.airportCode,
+            'airport': fuck_addr(stop.airportName),
+            'weather': stop.weather,
+            'temp': stop.temp,
+            'std': stop.std,
+            'sta': stop.sta,
+            'etd': stop.etd,
+            'eta': stop.eta,
+            'atd': stop.atd,
+            'ata': stop.ata,
+        })
+    return data
 
 
 
@@ -96,11 +135,14 @@ class ApiWrapper(object):
     def __init__(self, *args, **kwargs):
         self.api = api.Api()
 
+    async def get_flight_status_by_city(self, code, date=''):
+        date = date or datetime.now().strftime("%Y-%m-%d")
 
-    async def get_flight_status_by_code(self, code, date=''):
+
+    async def get_flight_status_by_code(self, code, date='', dept='', dest=''):
         date = date or datetime.now().strftime("%Y-%m-%d")
         code = str(code)
-        reply = self.api.get_flight_status_by_code(code, date)
+        reply = self.api.get_flight_status_by_code(code, date, dept, dest)
         self.api.randomize()
         print(reply)
         if reply.payload.errcode:
@@ -121,7 +163,10 @@ class ApiWrapper(object):
                     'data': flight_status_to_json(flight)
                 }
             else:
-                return error_json(detail=f'疑似代码共享航班')
+                # multiple choice
+                # return error_json(detail=f'疑似代码共享航班')
+                whole_flight = s2c.flightStatusList[-1]
+                return await self.get_flight_status_by_code(code, date, whole_flight.deptCityCode, whole_flight.destCityCode)
 
 
     async def search_flight_no(self, code):
@@ -230,7 +275,7 @@ def main():
     ])
     app.router.add_static('/static/', path='./static/', name='static')
     app.router.add_get('/', index_handler)
-    web.run_app(app, port=8443)
+    web.run_app(app, port=8080)
 
 
 if __name__ == '__main__':

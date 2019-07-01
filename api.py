@@ -229,11 +229,13 @@ class Api(object):
         tm = datetime.now().strftime("%Y-%m-%d").encode()
         return umetrip.sign(tm + s.encode()).decode()
 
-    def get_flight_status_by_code(self, flight_no, dept_date=None):
+    def get_flight_status_by_code(self, flight_no, dept_date=None, dept_iata='', dest_iata=''):
         dept_date = dept_date or datetime.now().strftime("%Y-%m-%d")
         payload = pb.C2sGetFlightStatusByCode(
             flightNo=flight_no,
             deptFlightDate=dept_date,
+            deptAirportCode=dept_iata, # 用于多段航班
+            destAirportCode=dest_iata,
         )
         print(payload)
 

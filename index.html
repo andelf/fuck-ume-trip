@@ -2,6 +2,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=devide-width, initial-scale=1.0" />
     <title>Timeline</title>
     <link
       rel="stylesheet"
@@ -20,6 +21,15 @@
         font-family: "Roboto Mono", monospace;
         font-weight: 100;
       }
+      .container h1 img#loading {
+        height: 2em;
+        position: relative;
+        top: 20px;
+        visibility: visible;
+      }
+      .container h1 img#loading.hide {
+        visibility: hidden;
+      }
       .container h2 {
         color: #fff;
         padding: 1px 50px;
@@ -34,8 +44,8 @@
       .container div#flights {
       }
 
-      .container div#flights a,
-      .container ul#cards div.info a {
+      .container div#flights button,
+      .container ul#cards div.info button {
         margin: 5px 10px;
         display: inline-block;
         text-decoration: underline;
@@ -148,6 +158,15 @@
       let g = {};
       g.lastReq = (new Date()).getTime();
 
+      const loading = (isLoading) => {
+        let dom = document.getElementById('loading');
+        if (isLoading) {
+          dom.setAttribute('class', '');
+        } else {
+          dom.setAttribute('class', 'hide');
+        }
+      }
+
 
       const handleError = (error) => {
         if (error) {
@@ -171,12 +190,15 @@
         if (date) {
           payload['date'] = date;
         }
+        loading(true);
         fetch('/api/v1/get_flight_by_code', {
           body: JSON.stringify(payload),
           method: 'POST'
         })
         .then(resp => resp.json())
         .then(payload => {
+          loading(false);
+
           let {data, error} = payload;
           console.log(payload);
           if (error) {
@@ -195,6 +217,18 @@
             const hostAircorpCode = flight.hostFlight.no.substring(0, 2).toLowerCase();
             hostFlightDesc = `(执飞 ${flight.hostFlight.aircorp}<img src="./static/aircorp/aircorp_${hostAircorpCode}.png" />${flight.hostFlight.no})`
           }
+
+          let stopDesc = "";
+          for (let stop of flight.stops) {
+            stopDesc += `
+------------- ${stop.status} ------------
+${stop.airport}(${stop.iata})
+STA: ${stop.sta}   STD: ${stop.std}
+ETA: ${stop.eta}   ETD: ${stop.etd}
+ATA: ${stop.ata === '' ? '--:--' : stop.ata}   ATD: ${stop.atd === '' ? '--:--' : stop.atd}
+            `;
+          }
+
           let preFlightDesc = "";
           if (flight.preFlight.no) {
             let when = '';
@@ -204,7 +238,7 @@
             }
             preFlightDesc = `
             前序:
-            <a onclick="queryFilght('${flight.preFlight.no}', false, '${when}');">${flight.preFlight.no}</a>
+            <button onclick="queryFilght('${flight.preFlight.no}', false, '${when}');">${flight.preFlight.no}</button>
               ${flight.preFlight.desc} ${flight.preFlight.status}
             `;
           }
@@ -226,6 +260,7 @@
 STD: ${flight.std}   STA: ${flight.sta}
 ETD: ${flight.etd}   ETA: ${flight.eta}
 ATD: ${flight.atd === '' ? '--:--' : flight.atd}   ATA: ${flight.ata === '' ? '--:--' : flight.ata}
+${stopDesc}
 -------------------------------
 ${flight.plane.type} 注册编号: ${flight.plane.no}
 </pre>
@@ -256,14 +291,15 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
         }
         g.lastReq = (new Date()).getTime();
         */
+        loading(true);
+
         fetch('/api/v1/search_flights', {
           body: JSON.stringify({code: val}),
           method: 'POST'
         })
-        .then(resp => {
-          return resp.json();
-        })
+        .then(resp => resp.json())
         .then(payload => {
+          loading(false);
           let {data, error} = payload;
           let dom = document.getElementById('flights');
           dom.innerHTML = '';
@@ -273,7 +309,7 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
           } else {
             cleanError();
             for (let no of data) {
-              var node = document.createElement('a');
+              var node = document.createElement('button');
               node.setAttribute('onclick', `queryFilght('${no}', true);`);
               node.appendChild(document.createTextNode(no));
               dom.appendChild(node);
@@ -286,7 +322,7 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
   <body>
 
     <div class="container">
-      <h1>😤😤非常不准</h1>
+      <h1>😤😤非常不准 <img id="loading" src="./static/loading.svg" class="hide"/> </h1>
       <h2>前序日期有小bug 😐</h2>
       <input type="text" placeholder="Search.." onkeyup="getValue(this)">
       <hr />

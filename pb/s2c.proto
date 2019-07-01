@@ -296,7 +296,7 @@ message S2cFlightStatusBean {
     // 执飞航班号 NX7. 不稳定。jumpParams 比较靠谱
     optional string hostNos = 85;
     optional bool isHaveFlightStop = 86;
-    // 备降信息 ? (是否经停也在)
+    // 备降信息 ? +经停也在
     //
     repeated FlightStopInfo flightStopInfoList = 87;
     optional string etdOrAtdTitle = 88;
