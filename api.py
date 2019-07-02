@@ -359,7 +359,46 @@ class Api(object):
             .data(c2s)
         return self.request(req)
 
-    def get_flight_status_link(self):
+    def get_punctuality(self, code='MU5646', dept_date=None, dept_code='KMG', dest_code='HGH'):
+        # s2cGetPunctualityRate
+        # 有雷达图，航线
+        dept_date = dept_date or datetime.now().strftime("%Y-%m-%d")
+        c2s = {
+            'flightNo': code,
+            'depAirport': dept_code,
+            'arrAirport': dest_code,
+            'deptFlightDate': dept_date,
+        }
+        req = JsonRequest() \
+            .pid("200367") \
+            .page_id("106303") \
+            .data(c2s)
+        return self.request(req)
+
+    def get_preflight_list(self, code='MU5646', reg_no='B7836', dept_date=None, dept_code='KMG', dest_code='HGH', std='MUST'):
+        # c2sGetPreFlightList
+        # api.get_preflight_list('MF8105', 'B7836', '2019-07-02', 'XMN', 'PEK', std='15:00')
+        c2s = {
+            'deptFlightDate': dept_date,
+            'regNo': reg_no,
+            'flightNo': code,
+            'deptAirportCode': dept_code,
+            'destAirportCode': dest_code,
+            'std': std,
+        }
+        # 7: 2, 4, 1, 0, 3
+        key = self.get_key(c2s['regNo'] + c2s['deptFlightDate'] + c2s['flightNo'] + c2s['deptAirportCode'] + c2s['std'])
+        req = JsonRequest() \
+            .pid("1060030") \
+            .version("1.0") \
+            .key(key) \
+            .data(c2s)
+        return self.request(req)
+
+
+    def get_flight_status_link(self, code='MU5646', dept_date=None, dept_code='KMG', dest_code='HGH'):
+        dept_date = dept_date or datetime.now().strftime("%Y-%m-%d")
+
         # 状态链 c2sFlightStatusLink
         c2s = {
             'deptFlightDate': '2019-06-27',
@@ -433,7 +472,6 @@ class Api(object):
             .pid("1060026") \
             .data({'flightNo': flight_no})
         return self.request(req)
-
 
 
 """

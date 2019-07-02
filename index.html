@@ -184,6 +184,78 @@
         dom.innerHTML = '';
       }
 
+      const yesterday = (day) => {
+        // in YYYY-MM-DD
+        const matches = /(\d\d\d\d)\-(\d\d)\-(\d\d)/.exec(day);
+        const thisDay = new Date(Number.parseInt(matches[1]), Number.parseInt(matches[2] - 1), Number.parseInt(matches[3]));
+        const thatDay = new Date(thisDay - 1000 * 3600 * 12);
+        return `${thatDay.getFullYear()}-${(thatDay.getMonth()+1).toString().padStart(2, '0')}-${thatDay.getDate().toString().padStart(2, '0')}`;
+      }
+
+      function queryPreflights(query) {
+        loading(true);
+        fetch('/api/v1/get_preflights', {
+          body: JSON.stringify(query),
+          method: 'POST'
+        })
+        .then(resp => resp.json())
+        .then(payload => {
+          loading(false);
+          console.log(payload);
+
+          let {data, error} = payload;
+          if (error) {
+            handleError(error);
+            return false;
+          }
+
+          const cards = document.getElementById('cards');
+
+          let card = document.createElement('li');
+          let html = '';
+          for (let flight of data) {
+            let raw = `
+${flight.no == query.code ? flight.no + '👈' : flight.no} ${flight.dept.date} ${flight.desc} ${flight.status}
+${flight.dept.airport}(${flight.dept.iata}) => ${flight.dest.airport}(${flight.dest.iata})\n`;
+
+            if (flight.std) {
+              raw += `STD: ${flight.std}   STA: ${flight.sta}\n`;
+            }
+            if (flight.etd) {
+              raw += `ETD: ${flight.etd}   ETA: ${flight.eta}\n`;
+            }
+            if (flight.atd) {
+              raw += `ATD: ${flight.atd}   ATA: ${flight.ata}\n`;
+            }
+            // in reversed order
+            html = raw + html;
+          }
+
+          const backQuery = JSON.stringify({
+            ...query,
+            date: yesterday(query.date),
+          });
+          const traceButton = `
+          <button onclick='queryPreflights(${backQuery})'>向前追溯(BUG)</button>
+          `;
+
+          card.innerHTML = `
+              <div>
+                <div class="type">前序分析 ${query.date} for ${query.code}</div>
+                <div class="title">
+                  飞机注册编号 ${query.regno}
+                </div>
+                <div class="info">
+                  <pre>${html}</pre>
+                  ${traceButton}
+                </div>
+              </div>
+              <span class="number"><span>--:--</span> <span>--:--</span></span>
+          `;
+          cards.appendChild(card);
+        })
+      }
+
 
       function queryFilght(no, clean, date) {
         const payload = {code: no};
@@ -236,10 +308,19 @@ ATA: ${stop.ata === '' ? '--:--' : stop.ata}   ATD: ${stop.atd === '' ? '--:--' 
               const matches = /已于(\d+)月(\d+)日到达/.exec(flight.preFlight.desc);
               when = `2017-${matches[1].padStart(2, '0')}-${matches[2].padStart(2, '0')}`;
             }
+            const query = JSON.stringify({
+              code: flight.no,
+              date: flight.dept.date,
+              dept: flight.dept.iata,
+              dest: flight.dest.iata,
+              regno: flight.plane.no,
+              std: flight.std,
+            });
             preFlightDesc = `
             前序:
             <button onclick="queryFilght('${flight.preFlight.no}', false, '${when}');">${flight.preFlight.no}</button>
               ${flight.preFlight.desc} ${flight.preFlight.status}
+            <button onclick='queryPreflights(${query})'>前序分析</button>
             `;
           }
 
@@ -285,12 +366,6 @@ ${flight.plane.type} 注册编号: ${flight.plane.no}
           console.log("TOO short, wait for more input!");
           return false;
         }
-        /*
-        if ((new Date()).getTime() - g.lastReq < 5000) {
-          return false;
-        }
-        g.lastReq = (new Date()).getTime();
-        */
         loading(true);
 
         fetch('/api/v1/search_flights', {

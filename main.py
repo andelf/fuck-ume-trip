@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
-import aiohttp
-from aiohttp import web
 import os.path
 import logging
-import api
-import pb
-import shelve
-import aiosqlite
 import json
 from datetime import datetime
+
+import aiosqlite
+from aiohttp_sse import sse_response
+import aiohttp
+from aiohttp import web
+
+import api
+import pb
 
 
 D = json.dumps
@@ -29,6 +31,34 @@ def fuck_addr(addr):
     addr = addr.replace('中国梨山', '台湾梨山')
     addr = addr.replace('中国南竿', '台湾南竿')
     return addr
+
+def preflight_list_to_json(preflights):
+    ret = []
+    for flight in preflights:
+        ret.append({
+            'no': flight.get('flightNo', '??????'),
+            'status': flight.flightStatusDesc,
+            'desc': flight.flightStatusOffTimeDesc,
+
+            'std': flight.std,
+            'sta': flight.sta,
+            'atd': flight.get('atd', ''),
+            'ata': flight.get('ata', ''),
+            'etd': flight.get('etd', ''),
+            'eta': flight.get('eta', ''),
+
+            'dept': {
+                'city': fuck_addr(flight.deptCity),
+                'iata': flight.deptAirportCode,
+                'airport': fuck_addr(flight.deptAirportName),
+                'date': flight.deptFlightDate,
+            },
+            'dest': {
+                'iata': flight.destAirportCode,
+                'airport': fuck_addr(flight.destAirportName),
+            }
+        })
+    return ret
 
 def flight_status_to_json(flight):
     data = {
@@ -93,7 +123,6 @@ def flight_status_to_json(flight):
     stops = flight.flightStopInfoList
     data['stops'] = []
     for stop in stops:
-        print('stop\n', stop)
         data['stops'].append({
             'status': stop.airportStatus,
             'iata': stop.airportCode,
@@ -135,8 +164,24 @@ class ApiWrapper(object):
     def __init__(self, *args, **kwargs):
         self.api = api.Api()
 
-    async def get_flight_status_by_city(self, code, date=''):
+    async def get_preflight_list(self, code, date, dept, dest, std, regno):
+        reply = self.api.get_preflight_list(
+            code=code, reg_no=regno, dept_date=date, dept_code=dept,
+            dest_code=dest, std=std)
+        if reply.get('perror', None):
+            return error_json(code=reply.perror.pcode, detail=reply.perror.pmessage)
+
+        data = reply.presp.pdata
+        if not data:
+            return error_json(detail='已经没有数据了')
+        return {
+            'data': preflight_list_to_json(data.flightInfo)
+        }
+
+
+    async def get_flight_status_link(self, code, date='', dept='', dest=''):
         date = date or datetime.now().strftime("%Y-%m-%d")
+        raise RuntimeError
 
 
     async def get_flight_status_by_code(self, code, date='', dept='', dest=''):
@@ -229,32 +274,11 @@ async def handler(request):
             req = await request.json()
             return web.json_response(await stub.get_flight_status_by_code(**req))
 
+        if path == 'get_preflights':
+            req = await request.json()
+            return web.json_response(await stub.get_preflight_list(**req))
 
-    async with aiohttp.ClientSession() as sess:
-        if request.method == 'GET':
-            async with sess.get(url, proxy=proxy, headers=headers) as resp:
-                headers = resp.headers
-                ret = web.StreamResponse()
-                ret.headers.update(headers)
-                await ret.prepare(request)
-                async for data in resp.content.iter_any():
-                    await ret.write(data)
-                await ret.write_eof()
-                return ret
-        elif request.method == 'POST':
-            body = await request.content.read()
-            print(body)
-            async with sess.post(url, data=body, proxy=proxy, headers=headers) as resp:
-                headers = resp.headers
-                print('RESP', headers)
-                ret = web.StreamResponse()
-                ret.headers.update(headers)
-                await ret.prepare(request)
-                async for data in resp.content.iter_any():
-                    print('RESP', data)
-                    await ret.write(data)
-                await ret.write_eof()
-                return ret
+    return error_json(detail="不知道你瞎请求些啥")
 
 
 async def index_handler(request):
